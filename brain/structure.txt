@@ -1,0 +1,19 @@
+server/
+ ├─ routes/
+ │   └─ ai_brain.routes.js
+ │
+ ├─ brain/
+ │   ├─ promptEnhancer.js
+ │   ├─ keyExtractor.js
+ │   ├─ safetyChecker.js
+ │   ├─ duplicateChecker.js
+ │   ├─ scorer.js
+ │   └─ decisionEngine.js
+ │
+ ├─ services/
+ │   ├─ localAI.service.js
+ │   ├─ openrouter.service.js
+ │   └─ fallback.service.js
+ │
+ └─ models/
+     └─ Suggestion.js
