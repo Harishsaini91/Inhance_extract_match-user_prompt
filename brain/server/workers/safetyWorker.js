@@ -103,4 +103,4 @@ async function runSafetyWorker() {
 }
 
 /* Run every 20 seconds */
-setInterval(runSafetyWorker, 20000);
+setInterval(runSafetyWorker, 10000);

@@ -1,0 +1,18 @@
+server/
+├── stage3/
+│   ├── enhancementWorker.js
+│   ├── core/
+│   │   └── preProcessor.js
+│   ├── enhancers/
+│   │   ├── enhancer.interface.js
+│   │   ├── freeEnhancer.js
+│   │   ├── aiEnhancer.js
+│   │   └── index.js
+│   ├── approval/
+│   │   └── approvalManager.js
+│   └── knowledge/
+│       └── knowledgeUpdater.js
+│
+├── models/
+│   ├── DynamicKnowledge.js
+│   └── EnhancedSuggestion.js
