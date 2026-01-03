@@ -1,5 +1,5 @@
-// H:\Brain_api\brain\server\stage3\enhancers\index.js
 
+// H:\Brain_api\brain\server\stage3\enhancers\index.js
 const freeEnhancer = require("./freeEnhancer");
 const aiEnhancer = require("./aiEnhancer");
 
@@ -8,10 +8,12 @@ module.exports = function getEnhancer() {
     return async function safeAiEnhancer(input) {
       try {
         console.log("🤖 [AI] Enhancer selected");
+
         const aiText = await aiEnhancer(input);
+        const parsed = input.parseAI(aiText);
 
         return {
-          rawAIText: aiText,
+          ...parsed,
           enhancementSource: "ai",
         };
       } catch (err) {
@@ -27,6 +29,8 @@ module.exports = function getEnhancer() {
   }
 
   return async function freeOnlyEnhancer(input) {
+        console.log("🤖 [Free] Enhancer selected");
+
     const result = await freeEnhancer(input);
     return {
       ...result,
@@ -34,3 +38,4 @@ module.exports = function getEnhancer() {
     };
   };
 };
+ 

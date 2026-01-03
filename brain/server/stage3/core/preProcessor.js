@@ -1,40 +1,39 @@
 // H:\Brain_api\brain\server\stage3\core\preProcessor.js
+function extractKeywords(text) {
+  return text
+    .toLowerCase()
+    .split(/\W+/)
+    .filter(w => w.length > 4)
+    .slice(0, 6);
+}
 
-function parsePlainAIResponse(text) {
-  if (!text || text.includes("INVALID")) {
-    throw new Error("AI_FORMAT_INVALID");
-  }
-
-  const enhancedMatch = text.match(/ENHANCED_TEXT:\s*([\s\S]*?)\nKEYWORDS:/);
-  const keywordsMatch = text.match(/KEYWORDS:\s*(.*?)\nCATEGORY:/);
-  const categoryMatch = text.match(/CATEGORY:\s*(.*)$/);
-
-  if (!enhancedMatch || !keywordsMatch || !categoryMatch) {
-    throw new Error("AI_PARSE_FAILED");
-  }
-
-  const enhancedText = enhancedMatch[1].trim();
-  const keywords = keywordsMatch[1]
-    .split(",")
-    .map(k => k.trim().toLowerCase())
-    .filter(k => k.length > 2);
-
-  const category = categoryMatch[1].trim().toLowerCase();
-
-  if (!enhancedText || keywords.length < 3 || !category) {
-    throw new Error("AI_DATA_INCOMPLETE");
-  }
-
-  return {
-    enhancedText,
-    keywords,
-    category,
-  };
+function inferCategory(keywords) {
+  if (keywords.some(k => ["ai", "machine", "learning"].includes(k)))
+    return "ai";
+  if (keywords.some(k => ["programming", "javascript", "python"].includes(k)))
+    return "programming";
+  return "general";
 }
 
 module.exports = function preProcessor(input) {
+  const cleanedText = input.trim().replace(/\s+/g, " ");
+
   return {
-    cleanedText: input.trim().replace(/\s+/g, " "),
-    parseAI: parsePlainAIResponse,
+    cleanedText,
+
+    parseAI(aiText) {
+      if (!aiText || aiText.length < 20) {
+        throw new Error("AI_OUTPUT_TOO_WEAK");
+      }
+
+      const keywords = extractKeywords(aiText);
+      const category = inferCategory(keywords);
+
+      return {
+        enhancedText: aiText.trim(),
+        keywords,
+        category,
+      };
+    },
   };
 };
