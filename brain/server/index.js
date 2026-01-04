@@ -6,6 +6,7 @@ const cors = require("cors");
 
 const connectDB = require("./config/db");
 const aiBrainRoutes = require("./routes/ai_brain.routes");
+const adminRedFlag = require("./routes/adminRedFlag");
 const syncEnhancerConfig = require("./config/syncEnhancerConfig");
 
 const app = express();
@@ -16,8 +17,9 @@ app.use(express.json());
 
 /* Routes */
 app.use("/api/brain", aiBrainRoutes);
-
-/* Test Route */
+app.use("/admin", adminRedFlag);
+ 
+/* Test Route */ 
 app.get("/", (req, res) => {
   res.send("🧠 Brain API is running");
 });
@@ -41,7 +43,7 @@ if (process.env.NODE_ENV === "development") {
     // 3️⃣ Start server
     app.listen(PORT, () => {  
       console.log(`🚀 Server running on port ${PORT}`); 
-    });
+    }); 
   } catch (err) {
     console.error("❌ Server startup failed:", err);
     process.exit(1);
