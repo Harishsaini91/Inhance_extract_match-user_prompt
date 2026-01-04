@@ -19,11 +19,11 @@ const STRATEGY = process.env.ENHANCER_STRATEGY || "hybrid";
 module.exports = async function enhance(input) {
   // 🔴 OFF MODE
   // Enhancement disabled → safe local output
-  if (MODE === "off") {
-    // return runLocalEnhancer(input);
-    console.log("🛑 Stage-3 Enhancer is OFF — worker will not process documents");
-  return;
-  }
+//   if (MODE === "off") {
+//     // return runLocalEnhancer(input);
+//     console.log("🛑 Stage-3 Enhancer is OFF — worker will not process documents");
+//   return;
+//   }
 
   // 🟡 FREE MODE
   // No AI usage at all

@@ -23,8 +23,22 @@ const updateKnowledge = require("./knowledge/knowledgeUpdater");
 /* DB */
 mongoose.connect(process.env.MONGO_URI);
 
+
+
+
+
+
+
+
 /* Worker */
 async function runEnhancer() {
+
+ if (process.env.ENHANCER_MODE === "off") {
+    console.log("🛑 Stage-3 Enhancer is OFF — skipping this cycle");
+    return;
+  }
+
+
   console.log("⚙️ Stage-3 Enhancer running...");
 
   const docs = await GoodSuggestion.find({
