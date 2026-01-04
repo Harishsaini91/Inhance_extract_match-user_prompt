@@ -1,41 +1,35 @@
-
 // H:\Brain_api\brain\server\stage3\enhancers\index.js
-const freeEnhancer = require("./freeEnhancer");
+
 const aiEnhancer = require("./aiEnhancer");
+const freeEnhancer = require("./freeEnhancer");
+const parseAIInsight = require("../core/parseAIInsight");
 
-module.exports = function getEnhancer() {
-  if (process.env.ENHANCER_MODE === "ai") {
-    return async function safeAiEnhancer(input) {
-      try {
-        console.log("🤖 [AI] Enhancer selected");
+/**
+ * AI enhancer wrapper
+ * - Calls AI
+ * - Parses output
+ * - Throws on any failure
+ */
+async function runAIEnhancer(input) {
+  const aiText = await aiEnhancer(input);
+  const parsed = parseAIInsight(aiText);
 
-        const aiText = await aiEnhancer(input);
-        const parsed = input.parseAI(aiText);
-
-        return {
-          ...parsed,
-          enhancementSource: "ai",
-        };
-      } catch (err) {
-        console.warn("⚠️ [AI] Failed → fallback:", err.message);
-        const fallback = await freeEnhancer(input);
-
-        return {
-          ...fallback,
-          enhancementSource: "free",
-        };
-      }
-    };
-  }
-
-  return async function freeOnlyEnhancer(input) {
-        console.log("🤖 [Free] Enhancer selected");
-
-    const result = await freeEnhancer(input);
-    return {
-      ...result,
-      enhancementSource: "free",
-    };
+  return {
+    ...parsed,
+    enhancementSource: "ai",
   };
+}
+
+/**
+ * Local enhancer wrapper
+ * - Never throws
+ * - Always returns usable output
+ */
+async function runLocalEnhancer(input) {
+  return await freeEnhancer(input);
+}
+
+module.exports = {
+  runAIEnhancer,
+  runLocalEnhancer,
 };
- 

@@ -1,5 +1,5 @@
-
 // H:\Brain_api\brain\server\stage3\enhancementWorker.js
+
 require("dotenv").config({ path: "../.env" });
 const mongoose = require("mongoose");
 
@@ -7,12 +7,17 @@ const mongoose = require("mongoose");
 const GoodSuggestion = require("../models/GoodSuggestion");
 const EnhancedSuggestion = require("../models/EnhancedSuggestion");
 
-/* Core logic */
+/* Core */
 const cleanUserText = require("./core/cleanUserText");
-const parseAIInsight = require("./core/parseAIInsight");
-const extractLocalInsight = require("./enhancers/freeEnhancer");
+
+/* Strategy */
+const enhancementStrategy = require("./strategy/enhancementStrategy");
+
 /* Enhancers */
-const getEnhancer = require("./enhancers");
+const {
+  runAIEnhancer,
+  runLocalEnhancer,
+} = require("./enhancers");
 
 /* Approval & knowledge */
 const approve = require("./approval/approvalManager");
@@ -25,59 +30,112 @@ mongoose.connect(process.env.MONGO_URI);
 async function runEnhancer() {
   console.log("⚙️ Stage-3 Enhancer running...");
 
-  const docs = await GoodSuggestion.find().limit(5);
+  const docs = await GoodSuggestion.find({
+    processing: { $ne: true },
+  }).limit(5);
 
   for (const doc of docs) {
+    /* 🔒 Lock document */
+    const locked = await GoodSuggestion.findOneAndUpdate(
+      { _id: doc._id, processing: { $ne: true } },
+      { processing: true },
+      { new: true }
+    );
+ 
+    if (!locked) continue;
+
     try {
-      /* 1️⃣ Clean user input */
-      const cleanedText = cleanUserText(doc.prompt);
+      const decision = enhancementStrategy(locked);
 
-      /* 2️⃣ Run enhancer (AI or FREE) */
-      const enhancer = getEnhancer();
-      const enhancedResult = await enhancer({ cleanedText });
+      /* ⏳ WAIT MODE */
+      if (decision.action === "WAIT") {
+        if (decision.retryAfterMs) {
+          await GoodSuggestion.findByIdAndUpdate(locked._id, {
+            nextRetryAt: new Date(Date.now() + decision.retryAfterMs),
+            aiFailCount: decision.resetFailCount ? 0 : locked.aiFailCount,
+            processing: false,
+          });
+        } else {
+          await GoodSuggestion.findByIdAndUpdate(locked._id, {
+            processing: false,
+          });
+        }
 
-      /* 3️⃣ Approval gate */
+        continue;
+      }
+
+      /* 🧹 Clean input */
+      const cleanedText = cleanUserText(locked.prompt);
+
+      let enhancedResult;
+
+      /* 🤖 TRY AI */
+      if (decision.action === "TRY_AI") {
+        try {
+          enhancedResult = await runAIEnhancer({ cleanedText });
+
+          /* reset AI fail counter on success */
+          locked.aiFailCount = 0;
+          locked.nextRetryAt = null;
+        } catch (err) {
+          /* increment AI fail count */
+          locked.aiFailCount += 1;
+
+          await GoodSuggestion.findByIdAndUpdate(locked._id, {
+            aiFailCount: locked.aiFailCount,
+            processing: false,
+          });
+
+          console.error("⚠️ AI failure:", err.message);
+          continue;
+        }
+      }
+
+      /* 🛠 LOCAL FALLBACK */
+      if (decision.action === "USE_LOCAL") {
+        enhancedResult = await runLocalEnhancer({ cleanedText });
+      }
+
+      /* ✅ Approval */
       const isApproved = approve({
-        original: doc.prompt,
+        original: locked.prompt,
         enhanced: enhancedResult,
       });
 
-      if (!isApproved) continue;
-
-      /* 4️⃣ Normalize output */
-      let finalData;
-
-      // 🤖 AI response → strict parser
-      if (enhancedResult.enhancementSource === "ai") {
-        console.log("🧠 RAW AI RESPONSE:\n", enhancedResult.rawAIText);
-        finalData = parseAIInsight(enhancedResult.rawAIText);
-      }
-      // 🛠 FREE fallback → local extraction
-      else {
-        finalData = extractLocalInsight(cleanedText);
+      if (!isApproved) {
+        await GoodSuggestion.findByIdAndUpdate(locked._id, {
+          processing: false,
+        });
+        continue;
       }
 
-      /* 5️⃣ Save enhanced suggestion */
+      /* 💾 Save enhanced result */
       await EnhancedSuggestion.create({
-        userEmail: doc.userEmail,
-        originalPrompt: doc.prompt,
-        enhancedText: finalData.enhancedText,
-        keywords: finalData.keywords,
-        category: finalData.category,
+        userEmail: locked.userEmail,
+        originalPrompt: locked.prompt,
+        enhancedText: enhancedResult.enhancedText,
+        keywords: enhancedResult.keywords,
+        category: enhancedResult.category,
         enhancementSource: enhancedResult.enhancementSource,
         approved: true,
       });
 
-      /* 6️⃣ Update knowledge base */
-      await updateKnowledge(finalData.keywords, finalData.category);
+      /* 📚 Update knowledge */
+      await updateKnowledge(
+        enhancedResult.keywords,
+        enhancedResult.category
+      );
 
-      /* 7️⃣ Remove processed suggestion */
-      await GoodSuggestion.findByIdAndDelete(doc._id);
+      /* 🗑 Remove processed suggestion */
+      await GoodSuggestion.findByIdAndDelete(locked._id);
 
-      console.log("✅ Stage-3 success:", doc._id);
-
+      console.log("✅ Stage-3 success:", locked._id);
     } catch (err) {
       console.error("❌ Stage-3 error:", err.message);
+
+      await GoodSuggestion.findByIdAndUpdate(locked._id, {
+        processing: false,
+      });
     }
   }
 }

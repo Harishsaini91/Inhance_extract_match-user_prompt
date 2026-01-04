@@ -13,6 +13,15 @@ const GoodSuggestionSchema = new mongoose.Schema(
       type: String,
       default: "safety",
     },
+
+    aiFailCount: { type: Number, default: 0 },
+    nextRetryAt: { type: Date },
+       processing: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
+
   },
   { timestamps: true }
 );
