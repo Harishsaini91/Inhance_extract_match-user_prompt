@@ -21,12 +21,12 @@ app.use("/admin", adminRedFlag);
  
 /* Test Route */ 
 app.get("/", (req, res) => {
-  res.send("🧠 Brain API is running");
+  res.send("🧠 Brain API is running"); 
 });
-
+   
 /* Start Server */
 const PORT = process.env.PORT || 5000;
-
+ 
 if (process.env.NODE_ENV === "development") {
   console.log("🔧 Running in development mode");
 }
