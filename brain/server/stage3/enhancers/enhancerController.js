@@ -12,11 +12,8 @@
  */
 
 const { runAIEnhancer, runLocalEnhancer } = require("./index");
-
-const MODE = process.env.ENHANCER_MODE || "free";
-const STRATEGY = process.env.ENHANCER_STRATEGY || "hybrid";
-
-module.exports = async function enhance(input) {
+ 
+module.exports = async function enhance(input,{ mode, strategy }) {
   // 🔴 OFF MODE
   // Enhancement disabled → safe local output
 //   if (MODE === "off") {
@@ -27,15 +24,15 @@ module.exports = async function enhance(input) {
 
   // 🟡 FREE MODE
   // No AI usage at all
-  if (MODE === "free") {
+  if (mode === "free") {
     return runLocalEnhancer(input);
   }
 
   // 🟢 AI MODE
-  if (MODE === "ai") {
+  if (mode === "ai") {
     // 🔥 STRICT AI ONLY
     // No try/catch → error bubbles up
-    if (STRATEGY === "ai-only") {
+    if (strategy === "ai-only") {
       return await runAIEnhancer(input);
     }
 

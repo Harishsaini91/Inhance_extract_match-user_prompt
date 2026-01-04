@@ -13,8 +13,11 @@ const cleanUserText = require("./core/cleanUserText");
 /* Strategy */
 const enhancementStrategy = require("./strategy/enhancementStrategy");
 
-/* Enhancer Controller (IMPORTANT) */
+/* Enhancer Controller */
 const enhance = require("./enhancers/enhancerController");
+
+/* Config (DB-based runtime config) */
+const getEnhancerConfig = require("../config/getEnhancerConfig");
 
 /* Approval & knowledge */
 const approve = require("./approval/approvalManager");
@@ -23,23 +26,18 @@ const updateKnowledge = require("./knowledge/knowledgeUpdater");
 /* DB */
 mongoose.connect(process.env.MONGO_URI);
 
-
-
-
-
-
-
-
 /* Worker */
 async function runEnhancer() {
+  /* 🔧 READ RUNTIME CONFIG FROM DB */
+  const { mode, strategy } = await getEnhancerConfig();
 
- if (process.env.ENHANCER_MODE === "off") {
-    console.log("🛑 Stage-3 Enhancer is OFF — skipping this cycle");
+  /* 🛑 HARD STOP STAGE-3 */
+  if (mode === "off") {
+    console.log("🛑 Stage-3 Enhancer is OFF (DB config) — skipping cycle");
     return;
   }
 
-
-  console.log("⚙️ Stage-3 Enhancer running...");
+  console.log(`⚙️ Stage-3 Enhancer running [mode=${mode}, strategy=${strategy}]`);
 
   const docs = await GoodSuggestion.find({
     processing: { $ne: true },
@@ -75,22 +73,22 @@ async function runEnhancer() {
 
       let enhancedResult;
 
-      /* 🚀 ENHANCEMENT (AI / LOCAL / STRICT) */
+      /* 🚀 ENHANCEMENT */
       if (
         decision.action === "TRY_AI" ||
         decision.action === "USE_LOCAL"
       ) {
         try {
-          enhancedResult = await enhance({
-            cleanedText,
-            originalPrompt: locked.prompt,
-          });
+          enhancedResult = await enhance(
+            { cleanedText, originalPrompt: locked.prompt },
+            { mode, strategy }
+          );
 
-          // reset AI failure counters on success
+          // reset AI failure counters
           locked.aiFailCount = 0;
           locked.nextRetryAt = null;
         } catch (err) {
-          // STRICT AI failure reaches here
+          // strict AI failure
           locked.aiFailCount += 1;
 
           await GoodSuggestion.findByIdAndUpdate(locked._id, {
@@ -136,6 +134,7 @@ async function runEnhancer() {
       /* 🗑 Remove processed suggestion */
       await GoodSuggestion.findByIdAndDelete(locked._id);
 
+       
       console.log("✅ Stage-3 success:", locked._id);
     } catch (err) {
       console.error("❌ Stage-3 worker error:", err.message);

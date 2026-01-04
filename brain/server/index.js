@@ -6,7 +6,7 @@ const cors = require("cors");
 
 const connectDB = require("./config/db");
 const aiBrainRoutes = require("./routes/ai_brain.routes");
-// const verificationRoutes = require("./routes/verification.routes");
+const syncEnhancerConfig = require("./config/syncEnhancerConfig");
 
 const app = express();
 
@@ -16,23 +16,35 @@ app.use(express.json());
 
 /* Routes */
 app.use("/api/brain", aiBrainRoutes);
-// app.use("/api/brain", verificationRoutes); 
-
 
 /* Test Route */
 app.get("/", (req, res) => {
   res.send("🧠 Brain API is running");
 });
- 
+
 /* Start Server */
 const PORT = process.env.PORT || 5000;
- if (process.env.NODE_ENV === "development") {
-  console.log("Mongo connected in dev mode");
-} 
 
+if (process.env.NODE_ENV === "development") {
+  console.log("🔧 Running in development mode");
+}
 
-connectDB().then(() => {
-  app.listen(PORT, () =>
-    console.log(`🚀 Server running on port ${PORT}`)
-  );
-});
+(async () => {
+  try {
+    // 1️⃣ Connect DB
+    await connectDB();
+    console.log("✅ MongoDB connected");
+
+    // 2️⃣ Sync enhancer config from .env → DB
+    await syncEnhancerConfig(); 
+
+    // 3️⃣ Start server
+    app.listen(PORT, () => {  
+      console.log(`🚀 Server running on port ${PORT}`); 
+    });
+  } catch (err) {
+    console.error("❌ Server startup failed:", err);
+    process.exit(1);
+  }
+})(); 
+        
