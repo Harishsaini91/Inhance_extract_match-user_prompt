@@ -13,11 +13,8 @@ const cleanUserText = require("./core/cleanUserText");
 /* Strategy */
 const enhancementStrategy = require("./strategy/enhancementStrategy");
 
-/* Enhancers */
-const {
-  runAIEnhancer,
-  runLocalEnhancer,
-} = require("./enhancers");
+/* Enhancer Controller (IMPORTANT) */
+const enhance = require("./enhancers/enhancerController");
 
 /* Approval & knowledge */
 const approve = require("./approval/approvalManager");
@@ -41,7 +38,7 @@ async function runEnhancer() {
       { processing: true },
       { new: true }
     );
- 
+
     if (!locked) continue;
 
     try {
@@ -49,18 +46,13 @@ async function runEnhancer() {
 
       /* ⏳ WAIT MODE */
       if (decision.action === "WAIT") {
-        if (decision.retryAfterMs) {
-          await GoodSuggestion.findByIdAndUpdate(locked._id, {
-            nextRetryAt: new Date(Date.now() + decision.retryAfterMs),
-            aiFailCount: decision.resetFailCount ? 0 : locked.aiFailCount,
-            processing: false,
-          });
-        } else {
-          await GoodSuggestion.findByIdAndUpdate(locked._id, {
-            processing: false,
-          });
-        }
-
+        await GoodSuggestion.findByIdAndUpdate(locked._id, {
+          nextRetryAt: decision.retryAfterMs
+            ? new Date(Date.now() + decision.retryAfterMs)
+            : locked.nextRetryAt,
+          aiFailCount: decision.resetFailCount ? 0 : locked.aiFailCount,
+          processing: false,
+        });
         continue;
       }
 
@@ -69,16 +61,22 @@ async function runEnhancer() {
 
       let enhancedResult;
 
-      /* 🤖 TRY AI */
-      if (decision.action === "TRY_AI") {
+      /* 🚀 ENHANCEMENT (AI / LOCAL / STRICT) */
+      if (
+        decision.action === "TRY_AI" ||
+        decision.action === "USE_LOCAL"
+      ) {
         try {
-          enhancedResult = await runAIEnhancer({ cleanedText });
+          enhancedResult = await enhance({
+            cleanedText,
+            originalPrompt: locked.prompt,
+          });
 
-          /* reset AI fail counter on success */
+          // reset AI failure counters on success
           locked.aiFailCount = 0;
           locked.nextRetryAt = null;
         } catch (err) {
-          /* increment AI fail count */
+          // STRICT AI failure reaches here
           locked.aiFailCount += 1;
 
           await GoodSuggestion.findByIdAndUpdate(locked._id, {
@@ -86,14 +84,9 @@ async function runEnhancer() {
             processing: false,
           });
 
-          console.error("⚠️ AI failure:", err.message);
+          console.error("❌ Enhancement failed:", err.message);
           continue;
         }
-      }
-
-      /* 🛠 LOCAL FALLBACK */
-      if (decision.action === "USE_LOCAL") {
-        enhancedResult = await runLocalEnhancer({ cleanedText });
       }
 
       /* ✅ Approval */
@@ -131,7 +124,7 @@ async function runEnhancer() {
 
       console.log("✅ Stage-3 success:", locked._id);
     } catch (err) {
-      console.error("❌ Stage-3 error:", err.message);
+      console.error("❌ Stage-3 worker error:", err.message);
 
       await GoodSuggestion.findByIdAndUpdate(locked._id, {
         processing: false,

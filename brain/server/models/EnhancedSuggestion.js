@@ -10,8 +10,10 @@ const EnhancedSuggestionSchema = new mongoose.Schema(
     approved: Boolean,
     enhancementSource: {
       type: String,
-      enum: ["ai", "free"],
+      enum: ["ai", "local", "fallback"],
+      required: true,
     }
+
 
   },
   { timestamps: true }
