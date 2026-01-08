@@ -1,10 +1,9 @@
-// H:\Brain_api\brain\server\stage4\stage4Runner.js
-const mongoose = require("mongoose");
+// server/stage4/stage4Runner.js
 
+const mongoose = require("mongoose");
 require("dotenv").config({
   path: require("path").resolve(__dirname, "../../.env"),
 });
-// ↑ adjust if .env is inside /server
 
 const connectDB = require("../config/db");
 const runStage4 = require("./index");
@@ -12,16 +11,12 @@ const runStage4 = require("./index");
 (async () => {
   try {
     await connectDB();
-console.log("🧠 Connected DB:", mongoose.connection.name);
+    console.log("🧠 Connected DB:", mongoose.connection.name);
+    console.log("🟣 Stage-4 worker started");
 
-    console.log("🟣 Stage-4 worker connected to MongoDB");
-    
     let isRunning = false;
-    
+
     setInterval(async () => {
-        console.log("🟣 Stage-4 worker .....");
-
-
       if (isRunning) return;
       isRunning = true;
 

@@ -1,52 +1,86 @@
 // server/stage4/topic.matcher.js
-const {
-  OVERLAP_RATIO_THRESHOLD,
-  STOP_WORDS,
-  MAX_CORE_KEYWORDS,
-} = require("./stage4.constants");
 
-function normalize(arr = []) {
-  return arr
-    .map((k) => k.toLowerCase().trim())
-    .filter((k) => k && !STOP_WORDS.includes(k));
+const { MIN_SHARED_CONCEPTS } = require("./stage4.constants");
+
+/**
+ * Canonical concept vocabulary (HAND-DEFINED, STABLE)
+ * This is the CORE FIX
+ */
+const CANONICAL_MAP = {
+  technology: {
+    animation: ["animation", "vfx", "cgi", "motion"],
+    production: ["production", "pipeline", "workflow", "projects", "deadlines"],
+    finance: ["income", "revenue", "cash flow", "cashflow", "costs", "budget"],
+    team: ["artists", "artist", "workload", "team", "staff"],
+    clients: ["clients", "client", "customers"],
+    management: ["management", "planning", "scheduling", "coordination"],
+  },
+
+  career: {
+    skills: ["skills", "expertise", "ability"],
+    growth: ["growth", "progress", "advancement"],
+    learning: ["learning", "education", "training"],
+    work: ["work", "job", "profession"],
+    confidence: ["confidence", "self belief", "self esteem"],
+  },
+
+  health: {
+    nutrition: ["nutrition", "diet", "food"],
+    activity: ["exercise", "movement", "activity"],
+    lifestyle: ["lifestyle", "habits", "routine"],
+    energy: ["energy", "fatigue"],
+    wellbeing: ["health", "well being", "wellbeing"],
+  },
+};
+
+/**
+ * Convert raw AI keywords → canonical concepts
+ */
+function canonicalizeKeywords(keywords = [], category) {
+  const domainMap = CANONICAL_MAP[category];
+  if (!domainMap) return [];
+
+  const concepts = new Set();
+
+  for (const keyword of keywords) {
+    const k = keyword.toLowerCase();
+
+    for (const [concept, variants] of Object.entries(domainMap)) {
+      if (variants.some(v => k.includes(v))) {
+        concepts.add(concept);
+      }
+    }
+  }
+
+  return [...concepts];
 }
 
-// extract core meaning keywords
-function extractCoreKeywords(keywords = []) {
-  return normalize(keywords).slice(0, MAX_CORE_KEYWORDS);
-}
-
-// overlap ratio = common / min(lenA, lenB)
-function overlapRatio(a = [], b = []) {
-  if (!a.length || !b.length) return 0;
-
-  const setB = new Set(b);
-  const common = a.filter((k) => setB.has(k)).length;
-
-  return common / Math.min(a.length, b.length);
-}
-
+/**
+ * Match incoming suggestion against existing topics
+ */
 function matchTopic(existingTopics, suggestion) {
-  const incomingCore = extractCoreKeywords(suggestion.keywords);
+  const incomingConcepts = canonicalizeKeywords(
+    suggestion.keywords,
+    suggestion.category
+  );
 
   let bestMatch = null;
   let bestScore = 0;
 
   for (const topic of existingTopics) {
-    if (topic.category !== suggestion.category) continue;
+    const shared = topic.canonicalKeywords.filter(c =>
+      incomingConcepts.includes(c)
+    );
 
-    const topicCore = extractCoreKeywords(topic.canonicalKeywords);
-    const score = overlapRatio(topicCore, incomingCore);
-
-    if (score > bestScore) {
-      bestScore = score;
+    if (shared.length > bestScore) {
+      bestScore = shared.length;
       bestMatch = topic;
     }
   }
 
-  return bestScore >= OVERLAP_RATIO_THRESHOLD
-    ? { topic: bestMatch, coreKeywords: incomingCore }
-    : null;
+  return bestScore >= MIN_SHARED_CONCEPTS
+    ? { topic: bestMatch, canonicalConcepts: incomingConcepts }
+    : { topic: null, canonicalConcepts: incomingConcepts };
 }
 
-module.exports = { matchTopic, extractCoreKeywords };
+module.exports = { matchTopic };

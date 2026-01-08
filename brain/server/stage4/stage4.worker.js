@@ -1,13 +1,12 @@
 // server/stage4/stage4.worker.js
+
 const crypto = require("crypto");
 
 const EnhancedSuggestion = require("../models/EnhancedSuggestion");
 const CanonicalTopic = require("../models/CanonicalTopic");
 const TopicSourceArchive = require("../models/TopicSourceArchive");
 
-const { matchTopic, extractCoreKeywords } = require("./topic.matcher");
-
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const { matchTopic } = require("./topic.matcher");
 
 async function stage4Worker() {
   const suggestion = await EnhancedSuggestion.findOneAndUpdate(
@@ -18,44 +17,49 @@ async function stage4Worker() {
 
   if (!suggestion) return;
 
-  let topic = null;
-  let topicSaved = false;
-  let archiveSaved = false;
-
   try {
-    // 1️⃣ Find / create / update CanonicalTopic
     const existingTopics = await CanonicalTopic.find({
       category: suggestion.category,
     });
 
-    const matchResult = matchTopic(existingTopics, suggestion);
-    const coreKeywords = extractCoreKeywords(suggestion.keywords);
+    const { topic, canonicalConcepts } = matchTopic(
+      existingTopics,
+      suggestion
+    );
 
-    if (!matchResult) {
+    let finalTopic = topic;
+
+    // 🆕 CREATE NEW TOPIC
+    if (!finalTopic) {
+      if (canonicalConcepts.length < 3) {
+        throw new Error("INSUFFICIENT_CANONICAL_CONCEPTS");
+      }
+
       const topicKeySource =
-        suggestion.category + "|" + coreKeywords.sort().join("|");
+        suggestion.category + "|" + canonicalConcepts.sort().join("|");
 
       const topicKey = crypto
         .createHash("sha1")
         .update(topicKeySource)
         .digest("hex");
 
-      topic = await CanonicalTopic.create({
+      finalTopic = await CanonicalTopic.create({
         topicKey,
         category: suggestion.category,
-        canonicalTitle: coreKeywords[0] || suggestion.category,
+        canonicalTitle: canonicalConcepts[0],
         canonicalText: suggestion.enhancedText,
-        canonicalKeywords: coreKeywords,
+        canonicalKeywords: canonicalConcepts,
         sourceSuggestionIds: [suggestion._id],
         sourceCount: 1,
         firstSeenAt: new Date(),
         lastSeenAt: new Date(),
+        confidenceScore: 0.3,
       });
-    } else {
-      topic = matchResult.topic;
-
+    }
+    // 🔁 MERGE INTO EXISTING TOPIC
+    else {
       await CanonicalTopic.updateOne(
-        { _id: topic._id },
+        { _id: finalTopic._id },
         {
           $addToSet: { sourceSuggestionIds: suggestion._id },
           $inc: { sourceCount: 1 },
@@ -64,12 +68,10 @@ async function stage4Worker() {
       );
     }
 
-    topicSaved = true; // ✅ CanonicalTopic success
-
-    // 2️⃣ Archive
+    // 📦 ARCHIVE SOURCE
     await TopicSourceArchive.create({
-      topicId: topic._id,
-      topicKey: topic.topicKey,
+      topicId: finalTopic._id,
+      topicKey: finalTopic.topicKey,
       originalEnhancedId: suggestion._id,
       userEmail: suggestion.userEmail,
       originalPrompt: suggestion.originalPrompt,
@@ -78,16 +80,13 @@ async function stage4Worker() {
       category: suggestion.category,
       approved: suggestion.approved,
       enhancementSource: suggestion.enhancementSource,
-      createdAt: suggestion.createdAt,
+      archivedAt: new Date(),
     });
 
-    archiveSaved = true; // ✅ Archive success
+    // 🗑️ DELETE STAGE-3 DOC
+    await EnhancedSuggestion.deleteOne({ _id: suggestion._id });
 
-    // 3️⃣ DELETE ONLY IF BOTH SUCCEEDED
-    if (topicSaved && archiveSaved) {
-      await EnhancedSuggestion.deleteOne({ _id: suggestion._id });
-      console.log("🗑️ EnhancedSuggestion deleted safely");
-    }
+    console.log("🟢 Stage-4 merged into topic:", finalTopic._id);
   } catch (err) {
     console.error("❌ Stage-4 failed:", err.message);
 
@@ -98,6 +97,5 @@ async function stage4Worker() {
     );
   }
 }
-
 
 module.exports = stage4Worker;
