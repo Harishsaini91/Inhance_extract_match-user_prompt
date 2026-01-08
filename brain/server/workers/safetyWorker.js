@@ -1,6 +1,7 @@
 // H:\Brain_api\brain\server\workers\safetyWorker.js
 
-require("dotenv").config({ path: "../.env" });
+require("dotenv").config({ path: "../../.env" });
+
 const mongoose = require("mongoose");
 
 const RawSuggestion = require("../models/RawSuggestion");
@@ -24,8 +25,7 @@ async function runSafetyWorker() {
     retryCount: { $lt: 3 },
   })
     .limit(BATCH_SIZE)
-    .sort({ createdAt: 1 });
-
+    .sort({ createdAt: 1 }); 
   for (const raw of raws) {
     try {
       /* 🔒 Lock raw */

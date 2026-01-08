@@ -1,153 +1,74 @@
-[{
-  "_id": {
-    "$oid": "695a83fed7a4c3c798bb9862"
+[
+  {
+    "_id": "701000000000000000000001",
+    "userEmail": "user1@test.com",
+    "originalPrompt": "I feel stuck in my career path. I keep learning new skills but don’t feel confident enough to move forward. Everyone around me seems ahead and it creates pressure.",
+    "enhancedText": "Career uncertainty combined with constant comparison creates pressure and self-doubt. Continuous learning without clear direction reduces confidence and makes progress feel slow.",
+    "keywords": ["career", "uncertainty", "pressure", "comparison", "confidence"],
+    "category": "career",
+    "approved": true,
+    "processing": false,
+    "enhancementSource": "ai",
+    "createdAt": { "$date": "2026-01-05T10:00:00.000Z" }
   },
-  "userEmail": "human_stress1@test.com",
-  "originalPrompt": "I am totaly confuse in my carrer right now and its not like i didnt try. I study many things, web devlopment, backend, little bit of ai reading, but nothing feels stable. Every day i wake up with tension that time is running and i am still not settle. People around me already earning and i am stuck in learning mode only. This thing create heavy mental presure and i dont know how to decide one clear path without regret.",
-  "enhancedText": "Career uncertainty creates stress and anxiety. The individual has explored multiple fields but struggles to find stability. Comparing progress to others increases pressure. Deciding on a clear path without regret feels difficult.",
-  "keywords": [
-    "career",
-    "uncertainty",
-    "stress",
-    "progress",
-    "comparison",
-    "decision"
-  ],
-  "category": "career",
-  "approved": true,
-  "enhancementSource": "ai",
-  "createdAt": {
-    "$date": "2026-01-04T15:15:10.716Z"
+  {
+    "_id": "701000000000000000000002",
+    "userEmail": "user2@test.com",
+    "originalPrompt": "I am learning every day but I feel exhausted. If I stop I feel guilty, if I continue I feel burned out.",
+    "enhancedText": "Burnout develops when learning is driven by fear of falling behind rather than clarity. Guilt and exhaustion coexist, creating anxiety about career readiness.",
+    "keywords": ["burnout", "learning", "stress", "exhaustion", "career"],
+    "category": "career",
+    "approved": true,
+    "processing": false,
+    "enhancementSource": "ai",
+    "createdAt": { "$date": "2026-01-05T10:01:00.000Z" }
   },
-  "updatedAt": {
-    "$date": "2026-01-04T15:15:10.716Z"
+  {
+    "_id": "701000000000000000000003",
+    "userEmail": "user3@test.com",
+    "originalPrompt": "My planning always becomes complicated. I make goals and roadmaps but lose motivation after some time.",
+    "enhancedText": "Overplanning without clear direction leads to confusion and loss of motivation. Career progress slows when systems become too complex to maintain.",
+    "keywords": ["planning", "direction", "motivation", "consistency", "career"],
+    "category": "career",
+    "approved": true,
+    "processing": false,
+    "enhancementSource": "ai",
+    "createdAt": { "$date": "2026-01-05T10:02:00.000Z" }
   },
-  "__v": 0
-},
-{
-  "_id": {
-    "$oid": "695a8409d7a4c3c798bb986f"
+  {
+    "_id": "701000000000000000000004",
+    "userEmail": "user4@test.com",
+    "originalPrompt": "I feel afraid of interviews because I think my knowledge is shallow. Comparing myself to experts makes it worse.",
+    "enhancedText": "Fear of interviews and comparison with experienced professionals increases self-doubt. Uncertainty about skill depth delays career decisions.",
+    "keywords": ["interviews", "self-doubt", "confidence", "career", "preparation"],
+    "category": "career",
+    "approved": true,
+    "processing": false,
+    "enhancementSource": "ai",
+    "createdAt": { "$date": "2026-01-05T10:03:00.000Z" }
   },
-  "userEmail": "human_stress2@test.com",
-  "originalPrompt": "From last few months i am feeling burnout but i cannot stop. If i stop learning i feel guilty, if i continue i feel exausted. My mind is always calculte future risk, money, family expectation, and social compare. I want slow and logical growth but everywhere internet push fast success and hustle culture which break my confidence badly.",
-  "enhancedText": "Burnout occurs from continuous learning without breaks, causing guilt when stopping and exhaustion when continuing. Constant thoughts about future risks, financial concerns, family expectations, and social comparisons contribute to stress. The pressure to achieve fast success and the influence of hustle culture undermine confidence. A slower, more logical approach to growth is desired, but external pressures make this difficult.",
-  "keywords": [
-    "burnout",
-    "learning",
-    "exhaustion",
-    "stress",
-    "confidence",
-    "growth"
-  ],
-  "category": "career",
-  "approved": true,
-  "enhancementSource": "ai",
-  "createdAt": {
-    "$date": "2026-01-04T15:15:21.047Z"
+  {
+    "_id": "701000000000000000000005",
+    "userEmail": "user5@test.com",
+    "originalPrompt": "Social media makes me feel like slow growth is useless. Everyone talks about fast success.",
+    "enhancedText": "Exposure to fast-success narratives increases stress and self-doubt. Slow, steady career growth feels inadequate when compared to others.",
+    "keywords": ["growth", "comparison", "stress", "career", "self-doubt"],
+    "category": "career",
+    "approved": true,
+    "processing": false,
+    "enhancementSource": "ai",
+    "createdAt": { "$date": "2026-01-05T10:04:00.000Z" }
   },
-  "updatedAt": {
-    "$date": "2026-01-04T15:15:21.047Z"
-  },
-  "__v": 0
-},
-{
-  "_id": {
-    "$oid": "695a8415d7a4c3c798bb987c"
-  },
-  "userEmail": "human_stress3@test.com",
-  "originalPrompt": "I am trying to build something meaningfull but my planning always overcomplicate. I write notes, roadmaps, goals, but after some days i feel lost again. I dont know problem is lack of direction or lack of discipline. I want practical system to move step by step but my overthinking destroy consistency and motivation slowly.",
-  "enhancedText": "Creating a structured plan often becomes overly complex, leading to confusion and loss of direction. The challenge lies in determining whether the issue stems from unclear goals or inconsistent execution. A practical, step-by-step system is needed to maintain focus and motivation, but overthinking disrupts progress.",
-  "keywords": [
-    "planning",
-    "direction",
-    "discipline",
-    "consistency",
-    "motivation"
-  ],
-  "category": "career",
-  "approved": true,
-  "enhancementSource": "ai",
-  "createdAt": {
-    "$date": "2026-01-04T15:15:33.138Z"
-  },
-  "updatedAt": {
-    "$date": "2026-01-04T15:15:33.138Z"
-  },
-  "__v": 0
-},
-{
-  "_id": {
-    "$oid": "695a8417d7a4c3c798bb9886"
-  },
-  "userEmail": "human_stress4@test.com",
-  "originalPrompt": "Sometimes i feel i know many things on surface but nothing in depth. This make me fearfull about interviews, real work, and long term carrer. I compare myself with expert people online and then feel small. I want clarity how much is enough skill to start and when to stop preparing and just move forward.",
-  "enhancedText": "Lack of deep knowledge creates anxiety about interviews, work, and career progression. Comparing oneself to online experts can lower self-confidence. Clarity is needed on when to stop preparing and start applying skills. Understanding the threshold for sufficient expertise is important.",
-  "keywords": [
-    "career",
-    "interviews",
-    "expertise",
-    "confidence",
-    "preparation",
-    "self-doubt"
-  ],
-  "category": "career",
-  "approved": true,
-  "enhancementSource": "ai",
-  "createdAt": {
-    "$date": "2026-01-04T15:15:35.675Z"
-  },
-  "updatedAt": {
-    "$date": "2026-01-04T15:15:35.675Z"
-  },
-  "__v": 0
-},
-{
-  "_id": {
-    "$oid": "695a841ad7a4c3c798bb9893"
-  },
-  "userEmail": "human_stress5@test.com",
-  "originalPrompt": "I am not lazy but my energy is always low because my brain never rest. Every decision feel heavy, what to learn, what to skip, what future demand. I want simple thinking process and stable plan which reduce mental load and help me trust my progress without daily self doubt.",
-  "enhancedText": "I am not lazy but my energy is always low because my brain never rest. Every decision feel heavy, what to learn, what to skip, what future demand. I want simple thinking process and stable plan which reduce mental load and help me trust my progress without daily self doubt.",
-  "keywords": [
-    "energy",
-    "always",
-    "because",
-    "brain",
-    "never"
-  ],
-  "category": "general",
-  "approved": true,
-  "enhancementSource": "local",
-  "createdAt": {
-    "$date": "2026-01-04T15:15:38.194Z"
-  },
-  "updatedAt": {
-    "$date": "2026-01-04T15:15:38.194Z"
-  },
-  "__v": 0
-},
-{
-  "_id": {
-    "$oid": "695a8474d7a4c3c798bb98af"
-  },
-  "userEmail": "human_stress5@test.com",
-  "originalPrompt": "I am not lazy but my energy is always low because my brain never rest. Every decision feel heavy, what to learn, what to skip, what future demand. I want simple thinking process and stable plan which reduce mental load and help me trust my progress without daily self doubt.",
-  "enhancedText": "I am not lazy but my energy is always low because my brain never rest. Every decision feel heavy, what to learn, what to skip, what future demand. I want simple thinking process and stable plan which reduce mental load and help me trust my progress without daily self doubt.",
-  "keywords": [
-    "energy",
-    "always",
-    "because",
-    "brain",
-    "never"
-  ],
-  "category": "general",
-  "approved": true,
-  "enhancementSource": "local",
-  "createdAt": {
-    "$date": "2026-01-04T15:17:08.906Z"
-  },
-  "updatedAt": {
-    "$date": "2026-01-04T15:17:08.906Z"
-  },
-  "__v": 0
-}]
+  {
+    "_id": "701000000000000000000006",
+    "userEmail": "user6@test.com",
+    "originalPrompt": "I don’t know when to stop preparing and start working. Every decision feels risky.",
+    "enhancedText": "Decision fatigue and uncertainty about readiness make career progression feel risky. Fear of choosing the wrong path delays action.",
+    "keywords": ["decision", "uncertainty", "risk", "confidence", "career"],
+    "category": "career",
+    "approved": true,
+    "processing": false,
+    "enhancementSource": "ai",
+    "createdAt": { "$date": "2026-01-05T10:05:00.000Z" }
+  }
+]

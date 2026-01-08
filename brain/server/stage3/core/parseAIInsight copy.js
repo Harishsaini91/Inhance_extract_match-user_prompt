@@ -1,7 +1,7 @@
 /**
  * parseAIInsight.js
  * -----------------
- * Robust parser + normalizer for AI plain-text responses.
+ * Strict parser for AI plain-text responses.
  *
  * Expected AI format:
  *
@@ -15,6 +15,8 @@
  * <single lowercase word>
  */
 
+// H:\Brain_api\brain\server\stage3\core\parseAIInsight.js
+
 const ALLOWED_CATEGORIES = [
   "education",
   "technology",
@@ -27,28 +29,11 @@ const ALLOWED_CATEGORIES = [
   "general",
 ];
 
-// words that add noise or intent
-const KEYWORD_BLACKLIST = [
-  "goal",
-  "goals",
-  "routine",
-  "routines",
-  "process",
-  "framework",
-  "system",
-  "approach",
-];
-
-// minimum keyword requirement (aligned with AI prompt)
-const MIN_KEYWORDS = 10;
-const MAX_KEYWORDS = 18;
-
 module.exports = function parseAIInsight(rawText) {
   if (!rawText || typeof rawText !== "string") {
     throw new Error("AI_EMPTY_RESPONSE");
   }
 
-  // 🔑 CRITICAL: trim whitespace first
   const text = rawText.trim();
 
   // ❌ Explicit AI failure signal
@@ -56,7 +41,7 @@ module.exports = function parseAIInsight(rawText) {
     throw new Error("AI_MARKED_INVALID");
   }
 
-  /* ---------- Extract blocks (whitespace tolerant) ---------- */
+  /* ---------- Extract blocks ---------- */
 
   const summaryMatch = text.match(
     /SUMMARY:\s*([\s\S]*?)\n\s*\n\s*KEYWORDS:/i
@@ -67,7 +52,7 @@ module.exports = function parseAIInsight(rawText) {
   );
 
   const categoryMatch = text.match(
-    /CATEGORY:\s*([a-zA-Z]+)/i
+    /CATEGORY:\s*(.+)$/i
   );
 
   if (!summaryMatch || !keywordsMatch || !categoryMatch) {
@@ -80,28 +65,22 @@ module.exports = function parseAIInsight(rawText) {
     .replace(/\s+/g, " ")
     .trim();
 
-  // enforce meaningful summary
   if (enhancedText.length < 40) {
     throw new Error("AI_SUMMARY_TOO_WEAK");
   }
 
   /* ---------- Normalize keywords ---------- */
 
-  let keywords = keywordsMatch[1]
+  const keywords = keywordsMatch[1]
     .split(",")
-    .map(k => k.toLowerCase())
-    .map(k => k.replace(/[-]/g, " "))     // well-being → well being
-    .map(k => k.replace(/\s+/g, " ").trim())
+    .map(k => k.trim().toLowerCase())
     .filter(k => k.length > 2)
-    .filter(k => !KEYWORD_BLACKLIST.includes(k))
-    .filter((v, i, a) => a.indexOf(v) === i); // de-duplicate
+    .filter((v, i, a) => a.indexOf(v) === i) // remove duplicates
+    .slice(0, 6);
 
-  if (keywords.length < MIN_KEYWORDS) {
+  if (keywords.length < 3) {
     throw new Error("AI_KEYWORDS_INSUFFICIENT");
   }
-
-  // cap for safety (Stage-4 will further trim)
-  keywords = keywords.slice(0, MAX_KEYWORDS);
 
   /* ---------- Normalize category ---------- */
 

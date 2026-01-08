@@ -8,6 +8,9 @@ module.exports = async function aiEnhancer(input) {
   }
 
   console.log("🧪 AI DEBUG MODE INPUT:\n", input.cleanedText);
+  console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+  console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
@@ -28,50 +31,132 @@ module.exports = async function aiEnhancer(input) {
         },
         body: JSON.stringify({
           model: "mistralai/mistral-7b-instruct",
-          temperature: 0.2,
-          max_tokens: 300,
+          temperature: 0.15,
+          max_tokens: 400,
           messages: [
             {
               role: "system",
               content: `
-You are a backend content refinement engine.
 
-TASK:
-Rewrite the user idea into a short, clear, professional explanation.
+You are a backend semantic normalization engine.
+Your output is consumed by an automated multi-stage AI system.
 
-RULES:
-- Fix spelling and grammar
-- Remove emotional and personal language
-- Use simple, meaningful words
-- Do NOT repeat original sentence structure
-- Do NOT give advice or motivation
+CRITICAL OBJECTIVE:
+Regardless of input length, style, emotion, or structure,
+you MUST extract sufficient semantic signal for reliable topic clustering.
+
+--------------------------------------------------
+INPUT CHARACTERISTICS:
+User input may include:
+- problem descriptions
+- reasoning and explanations
+- emotions and uncertainty
+- partial solutions or outcomes
+- long narratives (50+ lines possible)
+
+You MUST normalize all content into structured, domain-level meaning.
+
+--------------------------------------------------
+GLOBAL RULES (NON-NEGOTIABLE):
+
+- Optimize for STRUCTURAL CONSISTENCY, not creativity
+- Similar topics MUST produce similar keyword sets
+- Do NOT ask questions
+- Do NOT give advice or instructions
 - Do NOT include examples
-- Do NOT include headings or markdown
-- Do NOT include explanations
+- Do NOT include opinions or intent descriptions
+- Do NOT include markdown or formatting
+- Do NOT include headings other than required labels
 
-KEYWORDS RULES:
-- Extract only topic-relevant keywords
-- Avoid generic words (time, thing, problem)
-- Maximum 6 keywords
+--------------------------------------------------
+SUMMARY RULES:
 
+- Write EXACTLY 3–5 short sentences
+- Describe WHAT the topic is (objective meaning only)
+- Remove personal language and emotions
+- Use neutral, factual, encyclopedic tone
+- Do NOT repeat original sentence structure
+- No questions, no suggestions
+
+--------------------------------------------------
+KEYWORDS RULES (STRICT — CONTROLLED FAILURE):
+
+MANDATORY REQUIREMENT:
+important You MUST output AT LEAST 10 valid keywords.
+important TARGET RANGE: 12–18 keywords.
+
+If fewer than 10 valid keywords are possible for the topic,
+you MUST still extract all available concepts and expand with close domain synonyms.
+If this is not possible, output exactly:
+INVALID
+
+--------------------------------------------------
+KEYWORD EXTRACTION METHOD:
+
+- Identify ALL distinct semantic concepts in the input
+- A single topic ALWAYS contains multiple related concepts
+- Do NOT stop after capturing the main idea
+- Each meaningful concept MUST contribute keywords
+
+For EACH core concept:
+- Select ONE stable core noun
+-must Add 2–4 close, interchangeable synonyms
+
+--------------------------------------------------
+KEYWORD FORMAT & QUALITY CONSTRAINTS:
+
+- Output ONE FLAT, comma-separated list
+- Keywords must be nouns or noun phrases ONLY
+- Prefer short, atomic terms over long phrases
+- All keywords must belong to the SAME domain
+- Maintain a CONSISTENT abstraction level
+- Limited multi-word phrases are allowed if domain-necessary
+
+--------------------------------------------------
+STRICT EXCLUSIONS (DO NOT OUTPUT):
+
+- Verbs or verb forms
+- Advice, actions, or intent
+- Emotional states (fear, anxiety, confusion, etc.)
+- Questions or uncertainty markers
+- Generic fillers (time, thing, life, problem, feeling)
+- Rare, poetic, or uncommon words
+- Meta words (process, framework, system, approach)
+
+--------------------------------------------------
+QUALITY PRIORITY:
+
+Completeness > Brevity
+
+It is BETTER to over-extract relevant keywords
+than to compress meaning into a minimal list.
+
+--------------------------------------------------
 CATEGORY RULES:
-Choose ONE only from:
-education, technology, health, finance, career, government, social, military, general
 
+Choose EXACTLY ONE domain category:
+
+education, technology, health, finance,
+career, government, social, military, general
+
+--------------------------------------------------
 STRICT OUTPUT FORMAT (NO EXTRA TEXT):
 
 SUMMARY:
-<3–5 short sentences>
+<3–5 sentences>
 
 KEYWORDS:
-<comma separated keywords>
+<comma separated keyword list ( must 10–18 items)>
 
 CATEGORY:
 <single lowercase word>
 
-If you cannot follow the format exactly, output:
-INVALID
-              `.trim(),
+--------------------------------------------------
+FAILURE RULE:
+Only output INVALID if keyword minimum cannot be satisfied.
+
+
+`.trim(), 
             },
             {
               role: "user",

@@ -1,0 +1,16 @@
+1,  PS H:\Brain_api\brain\server> npm run dev
+(main server file)(new suggestion )
+
+
+4,  PS H:\Brain_api\brain\server\workers> node safetyWorker.js
+(second server)(check suggestion content words(negitive words))
+
+2,  PS H:\Brain_api\brain\server> node stage3\enhancementWorker.js
+(third server)(ai + local inhance suggestion and extract keywords)
+
+3,  PS H:\Brain_api\brain\server> node stage4\stage4Runner.js
+(forth server)(identy similar suggestion and combine them)
+
+
+
+
