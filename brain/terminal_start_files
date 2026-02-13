@@ -14,3 +14,22 @@
 
 
 
+
+
+raw postman input
+
+1,  PS H:\Brain_api\brain\server> npm run dev
+(main server file)(new suggestion )
+
+post    http://127.0.0.1:5000/api/brain/prompt
+
+{
+  "email": "human_career1@test.com",
+  "prompt": "I am reaching a point where I feel deeply confused about my career direction. I have learned many skills over the years, some technical, some general, but none of them feel like a stable foundation. I constantly compare my progress with others who seem settled, and that comparison makes me doubt every decision I make. I want to understand how an experienced person thinks when choosing one path without constantly fearing that they are making the wrong choice."
+}
+
+
+
+
+for admin approve to a red flag sugestion
+http://127.0.0.1:5000/admin/redflag/695a55f6d5e597b5a6d34332/approve

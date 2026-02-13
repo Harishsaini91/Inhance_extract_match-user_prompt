@@ -10,6 +10,7 @@ const BlacklistedEmail = require("../models/BlacklistedEmail");
  */
 router.post("/prompt", async (req, res) => {
   try {
+     console.log("🔥 PROMPT HIT");
     const { email, prompt } = req.body;
 
     if (!email || !prompt) {
