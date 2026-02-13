@@ -1,9 +1,7 @@
 // server/stage4/stage4Runner.js
 
 const mongoose = require("mongoose");
-require("dotenv").config({
-  path: require("path").resolve(__dirname, "../../.env"),
-});
+require("dotenv").config();
 
 const connectDB = require("../config/db");
 const runStage4 = require("./index");

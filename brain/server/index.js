@@ -14,7 +14,7 @@ const app = express();
 
 /* Middleware */
 app.use(cors());
-app.use(express.json());
+app.use(express.json()); 
 
 /* Routes */
 app.use("/api/brain", aiBrainRoutes);
@@ -45,22 +45,22 @@ if (process.env.NODE_ENV === "development") {
 
 
     // 3️⃣ START STAGE-4 WORKER LOOP (AUTO)
-    let stage4Running = false;
+    // let stage4Running = false;
 
-    setInterval(async () => {
-      if (stage4Running) return;
-      stage4Running = true;
+    // setInterval(async () => {
+    //   if (stage4Running) return;
+    //   stage4Running = true;
 
-      try {
-        await runStage4();
-      } catch (err) {
-        console.error("❌ Stage-4 error:", err.message);
-      } finally {
-        stage4Running = false;
-      } 
-    }, 3000); // ⏱ every 3 seconds
+    //   try {
+    //     await runStage4();
+    //   } catch (err) {
+    //     console.error("❌ Stage-4 error:", err.message);
+    //   } finally {
+    //     stage4Running = false;
+    //   } 
+    // }, 3000); // ⏱ every 3 seconds
  
-    console.log("🟣 Stage-4 worker started");
+    // console.log("🟣 Stage-4 worker started");
 
   
 

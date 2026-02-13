@@ -1,6 +1,6 @@
 // H:\Brain_api\brain\server\stage3\enhancementWorker.js
 
-require("dotenv").config({ path: "../.env" });
+require("dotenv").config();
 const mongoose = require("mongoose");
 
 /* Models */

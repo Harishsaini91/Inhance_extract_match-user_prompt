@@ -1,6 +1,6 @@
 // H:\Brain_api\brain\server\workers\safetyWorker.js
 
-require("dotenv").config({ path: "../../.env" });
+require("dotenv").config();
 
 const mongoose = require("mongoose");
 
